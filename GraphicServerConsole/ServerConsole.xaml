@@ -1,0 +1,16 @@
+﻿<Window x:Class="GraphicServerConsole.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GraphicServerConsole"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <TextBox x:Name="serverLogTextBox" HorizontalAlignment="Left" Height="336" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="761"/>
+        <Button x:Name="serverStartButton" Content="Start server" HorizontalAlignment="Left" Margin="26,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="serverStartButton_click"/>
+        <Button x:Name="stopServerButton" Content="Stop server" HorizontalAlignment="Left" Margin="649,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="stopServerButton_click"/>
+        <Button x:Name="exitButton" Content="Exit" HorizontalAlignment="Left" Margin="347,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="exitButton_click"/>
+
+    </Grid>
+</Window>

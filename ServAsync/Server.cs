@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace ServAsync
 {
-    class Server
+    public class Server
     {
+        TextBox log = null;
         Dictionary<string, int> loggedIn = new Dictionary<string, int>();
         Dictionary<string, string> userData = new Dictionary<string, string>();
         private byte[] buffer = new byte[1024];
@@ -24,18 +28,35 @@ namespace ServAsync
         private byte[] logOutInfo = Encoding.ASCII.GetBytes("User with this login is still logged in! Logging out...");
         private byte[] backToMain = Encoding.ASCII.GetBytes("Exiting to main... Write 'login' or 'register' and retype credentials: ");
 
+        public Server(ref TextBox txtBox)
+        {
+            this.log = txtBox;
+        }
+
         /// <summary>
         /// Glowna funkcja uruchamiajaca serwer
         /// </summary>
         public void SetupServer()
         {
-            userData.Add("admin","admin");
-            Console.Title = "SERVER";
-            Console.WriteLine("Setting up the server...");
+            userData.Add("admin", "admin");
+            log.Dispatcher.Invoke(delegate {
+                log.Text += "Setting up the server...\n";
+            });
             servSocekt.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 22111));
             servSocekt.Listen(10);
             servSocekt.BeginAccept(new AsyncCallback(AcceptCallback), null);
-            Console.WriteLine("Configuration complete!");
+            log.Dispatcher.Invoke(delegate
+            {
+                log.Text += "Configuration complete!\n";
+            });
+        }
+
+        /// <summary>
+        /// Funkcja zatrzymujaca dzialanie serwera - zamyka gniazdo
+        /// </summary>
+        public void StopServer()
+        {
+
         }
 
         /// <summary>
@@ -46,7 +67,10 @@ namespace ServAsync
         {
             Socket socket = servSocekt.EndAccept(ar);
             clientSockets.Add(socket);
-            Console.WriteLine($"[{DateTime.Now}] Client connected");
+            log.Dispatcher.Invoke(delegate
+            {
+                log.Text += $"[{DateTime.Now}] Client connected\n";
+            });
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
             socket.BeginSend(welcomeMessage, 0, welcomeMessage.Length, SocketFlags.None, SendCallback, socket);
             servSocekt.BeginAccept(AcceptCallback, null);
@@ -58,7 +82,7 @@ namespace ServAsync
         /// <param name="ar"></param>
         private void ChoiceCallback(IAsyncResult ar)
         {
-            
+
             Socket socket = (Socket)ar.AsyncState;
             try
             {
@@ -75,7 +99,10 @@ namespace ServAsync
                     request = request.Trim('\n');
 
                     if (text != "")
-                        Console.WriteLine($"[{DateTime.Now}] Received request: {request}");
+                        log.Dispatcher.Invoke(delegate
+                        {
+                            log.Text += $"[{DateTime.Now}] Received request: {request}\n";
+                        });
 
                     if (request == "exit")
                     {
@@ -105,7 +132,10 @@ namespace ServAsync
             }
             catch
             {
-                Console.WriteLine($"[{DateTime.Now}] Client disconnetcted");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client disconnetcted\n";
+                });
                 socket.Close();
                 clientSockets.Remove(socket);
             }
@@ -129,11 +159,17 @@ namespace ServAsync
                     {
                         loggedIn.Add(Encoding.ASCII.GetString(login).Trim('\0'), 1);
                         socket.BeginSend(logInfo, 0, logInfo.Length, SocketFlags.None, SendCallback, socket);
-                        Console.WriteLine($"[{DateTime.Now}] User '{Encoding.ASCII.GetString(login).Trim('\0')}' logged in");
+                        log.Dispatcher.Invoke(delegate
+                        {
+                            log.Text += $"[{DateTime.Now}] User '{Encoding.ASCII.GetString(login).Trim('\0')}' logged in\n";
+                        });
                     }
                     catch
                     {
-                        Console.WriteLine($"[{DateTime.Now}] Client '{Encoding.ASCII.GetString(login).Trim('\0')}' is still logged in, dissconnecting the client...");
+                        log.Dispatcher.Invoke(delegate
+                        {
+                            log.Text += $"[{DateTime.Now}] Client '{Encoding.ASCII.GetString(login).Trim('\0')}' is still logged in, dissconnecting the client...\n";
+                        });
                         socket.Close();
                         clientSockets.Remove(socket);
                     }
@@ -146,7 +182,10 @@ namespace ServAsync
             }
             catch
             {
-                Console.WriteLine($"[{DateTime.Now}] Client disconnetcted");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client disconnetcted\n";
+                });
                 socket.Close();
                 clientSockets.Remove(socket);
             }
@@ -211,7 +250,10 @@ namespace ServAsync
                                     }
                                     counter++;
                                 }
-                                Console.WriteLine($"[{DateTime.Now}] User {userKey} guessed the number. Logging out {userKey}...");
+                                log.Dispatcher.Invoke(delegate
+                                {
+                                    log.Text += $"[{DateTime.Now}] User {userKey} guessed the number. Logging out {userKey}...\n";
+                                });
                                 socket.BeginSend(again, 0, again.Length, SocketFlags.None, SendCallback, socket);
                             }
                         }
@@ -234,7 +276,10 @@ namespace ServAsync
             }
             catch
             {
-                Console.WriteLine($"[{DateTime.Now}] Client disconnetcted");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client disconnetcted\n";
+                });
                 socket.Close();
                 clientSockets.Remove(socket);
             }
@@ -253,12 +298,18 @@ namespace ServAsync
                 socket.BeginSend(enterPassword, 0, enterPassword.Length, SocketFlags.None, SendCallback, socket);
                 byte[] pass = Receive(socket);
                 userData.Add(Encoding.ASCII.GetString(login).Trim('\0'), Encoding.ASCII.GetString(pass).Trim('\0'));
-                Console.WriteLine($"[{DateTime.Now}] Client created account: {Encoding.ASCII.GetString(login).Trim('\0')}");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client created account: {Encoding.ASCII.GetString(login).Trim('\0')}\n";
+                });
                 socket.BeginSend(createMessage, 0, createMessage.Length, SocketFlags.None, SendCallback, socket);
             }
             catch
             {
-                Console.WriteLine($"[{DateTime.Now}] Client disconnetcted");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client disconnetcted\n";
+                });
                 socket.Close();
                 clientSockets.Remove(socket);
             }
@@ -290,7 +341,10 @@ namespace ServAsync
             }
             catch
             {
-                Console.WriteLine($"[{DateTime.Now}] Client disconnetcted");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client disconnetcted\n";
+                });
                 socket.Close();
                 clientSockets.Remove(socket);
             }
@@ -312,7 +366,10 @@ namespace ServAsync
             }
             catch
             {
-                Console.WriteLine($"[{DateTime.Now}] Client disconnetcted");
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Client disconnetcted\n";
+                });
                 socket.Close();
                 clientSockets.Remove(socket);
             }

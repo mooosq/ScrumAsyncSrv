@@ -12,3 +12,10 @@ C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 2\AsyncSrv\ServAsync\obj
 C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 2\AsyncSrv\ServAsync\obj\Debug\ServAsync.csproj.CoreCompileInputs.cache
 C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 2\AsyncSrv\ServAsync\obj\Debug\ServAsync.exe
 C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 2\AsyncSrv\ServAsync\obj\Debug\ServAsync.pdb
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\bin\Debug\ServAsync.exe.config
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\bin\Debug\ServAsync.exe
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\bin\Debug\ServAsync.pdb
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\obj\Debug\ServAsync.csprojAssemblyReference.cache
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\obj\Debug\ServAsync.csproj.CoreCompileInputs.cache
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\obj\Debug\ServAsync.exe
+C:\Users\t.komarnicki.LA-IT-03\Desktop\Semestr 5\IO\Lab 3\ScrumAsyncSrv\ServAsync\obj\Debug\ServAsync.pdb

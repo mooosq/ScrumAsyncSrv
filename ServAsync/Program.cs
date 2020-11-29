@@ -13,9 +13,7 @@ namespace ServAsync
     {
         static void Main(string[] args)
         {
-            Server asyncSrv = new Server();
-            asyncSrv.SetupServer();
-            Console.ReadKey();
+           
         }
     }
 }
