@@ -6,15 +6,15 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Security.Cryptography;
 
 namespace ServAsync
 {
-    public class Server
+    public class Server : IDisposable
     {
         TextBox log = null;
         Database db;
         Dictionary<string, int> loggedIn = new Dictionary<string, int>();
-        Dictionary<string, string> userData = new Dictionary<string, string>();
         private byte[] buffer = new byte[1024];
         private List<Socket> clientSockets = new List<Socket>();
         private Socket servSocekt = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -31,9 +31,14 @@ namespace ServAsync
         private byte[] userAlreadyExistMessage = Encoding.ASCII.GetBytes("User already exist.");
 
 
+        public void Dispose()
+        {
+            servSocekt.Dispose();
+        }
+
         public Server(ref TextBox txtBox)
         {
-            this.log = txtBox;
+            log = txtBox;
             db = new Database(log);
             db.setupDatabase();
         }
@@ -43,7 +48,6 @@ namespace ServAsync
         /// </summary>
         public void SetupServer()
         {
-            userData.Add("admin", "admin");
             log.Dispatcher.Invoke(delegate {
                 log.Text += "Setting up the server...\n";
             });
@@ -61,7 +65,15 @@ namespace ServAsync
         /// </summary>
         public void StopServer()
         {
+            foreach (Socket sock in clientSockets)
+                sock.Close();
 
+            LingerOption lo = new LingerOption(false, 0);
+            servSocekt.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, lo);
+            log.Dispatcher.Invoke(delegate
+            {
+                log.Text += $"[{DateTime.Now}] All clients disconnected. Server stopped\n";
+            });
         }
 
         /// <summary>
@@ -70,7 +82,18 @@ namespace ServAsync
         /// <param name="ar"></param>
         private void AcceptCallback(IAsyncResult ar)
         {
-            Socket socket = servSocekt.EndAccept(ar);
+            Socket socket;
+            try
+            {
+                 socket = servSocekt.EndAccept(ar);
+            } catch (ObjectDisposedException ex)
+            {
+                log.Dispatcher.Invoke(delegate
+                {
+                    log.Text += $"[{DateTime.Now}] Work ended properly\n";
+                });
+                return;
+            }
             clientSockets.Add(socket);
             log.Dispatcher.Invoke(delegate
             {
@@ -114,19 +137,19 @@ namespace ServAsync
                         socket.Close();
                         clientSockets.Remove(socket);
                     }
-                    else if (request == "login")
+                    else if (request == "login" || request == "gin")
                     {
                         socket.BeginSend(enterLogin, 0, enterLogin.Length, SocketFlags.None, SendCallback, socket);
                         login = Receive(socket);
                         Login(socket, login);
                     }
-                    else if (request == "register")
+                    else if (request == "register" || request == "gister")
                         Register(socket);
                     else
                         socket.BeginSend(invalidRequest, 0, invalidRequest.Length, SocketFlags.None, SendCallback, socket);
                 }
 
-                if (request == "login" && loggedIn.ContainsKey(Encoding.ASCII.GetString(login).Trim('\0')))
+                if (request == "login" || request == "gin" && loggedIn.ContainsKey(Encoding.ASCII.GetString(login).Trim('\0')))
                 {
                     if (loggedIn.TryGetValue(Encoding.ASCII.GetString(login).Trim('\0'), out isLogged) && isLogged == 1)
                         socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, GameCallback, socket);
@@ -182,8 +205,8 @@ namespace ServAsync
                 }
                 else
                 {
-                    socket.BeginSend(wrongCredentials, 0, wrongCredentials.Length, SocketFlags.None, SendCallback, socket);
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
+                    socket.BeginSend(wrongCredentials, 0, wrongCredentials.Length, SocketFlags.None, SendCallback, socket);
                 }
             }
             catch
@@ -214,13 +237,23 @@ namespace ServAsync
                 if (answerOut != "\r\ns")
                 {
                     socket.BeginSend(backToMain, 0, backToMain.Length, SocketFlags.None, SendCallback, socket);
+                    string userKey = FindUser(clientSockets.IndexOf(socket));
+                    log.Dispatcher.Invoke(delegate
+                    {
+                        log.Text += $"[{DateTime.Now}] User {userKey} logged out\n";
+                    });
                 }
                 else
                 {
                     bool guess = false;
                     byte[] type = new byte[1024];
-                    Random random = new Random();
-                    int userInput, randomInteger = random.Next() % 101;
+
+                    byte[] randomBytes = new byte[4];
+                    RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+                    rng.GetBytes(randomBytes);
+
+                    int userInput, randomInteger = BitConverter.ToInt32(randomBytes, 0) % 101;
+
                     byte[] randomInfo = Encoding.ASCII.GetBytes("Just get randomly selected number for you, try guess it!\r\nYour type: ");
                     byte[] tooBig = Encoding.ASCII.GetBytes("Too big number! Enter your type again: ");
                     byte[] tooSmall = Encoding.ASCII.GetBytes("Too small number! Enter your type again: ");
@@ -244,18 +277,7 @@ namespace ServAsync
                                 byte[] success = Encoding.ASCII.GetBytes($"You got it! The number is {randomInteger}. Thanks for playing!");
                                 socket.BeginSend(success, 0, success.Length, SocketFlags.None, SendCallback, socket);
                                 guess = true;
-                                string userKey = null;
-                                counter = 0;
-                                index = clientSockets.IndexOf(socket);
-                                foreach (KeyValuePair<string, int> user in loggedIn)
-                                {
-                                    if (counter == index)
-                                    {
-                                        userKey = user.Key;
-                                        break;
-                                    }
-                                    counter++;
-                                }
+                                string userKey = FindUser(clientSockets.IndexOf(socket));
                                 log.Dispatcher.Invoke(delegate
                                 {
                                     log.Text += $"[{DateTime.Now}] User {userKey} guessed the number. Logging out {userKey}...\n";
@@ -368,6 +390,27 @@ namespace ServAsync
             }
 
             return bytes;
+        }
+
+        /// <summary>
+        /// Funkcja zwracajaca nazwe uzytkownika po numerze gniazda do ktorego podlaczyl sie dany uzytkownik
+        /// </summary>
+        /// <param name="clientSocketIndex">Klucz danego uzytkownika w slowniku</param>
+        /// <returns></returns>
+        private string FindUser(int clientSocketIndex)
+        {
+            string userKey = null;
+            int counter = 0;
+            foreach (KeyValuePair<string, int> user in loggedIn)
+            {
+                if (counter == clientSocketIndex)
+                {
+                    userKey = user.Key;
+                    break;
+                }
+                counter++;
+            }
+            return userKey;
         }
 
         /// <summary>

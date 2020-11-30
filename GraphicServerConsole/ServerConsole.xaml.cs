@@ -37,13 +37,23 @@ namespace GraphicServerConsole
                 srv = new Server(ref serverLogTextBox);
                 srv.SetupServer();
             }
+            else
+                serverLogTextBox.Text += $"[{DateTime.Now}] Server already running!\n";
+
             srvState = false;
         }
 
         private void stopServerButton_click(object sender, RoutedEventArgs e)
         {
-            srv.StopServer();
-            serverLogTextBox.Text += $"[{DateTime.Now}] All clients disconnected. Server stopped\n";
+            if (!srvState)
+            {
+                srv.StopServer();
+                srv.Dispose();
+            }
+            else
+                serverLogTextBox.Text += $"[{DateTime.Now}] Server already stopped!\n";
+
+            srvState = true;
         }
 
         private void exitButton_click(object sender, RoutedEventArgs e)

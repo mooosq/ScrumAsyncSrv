@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GraphicServerConsole"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Server Console" Height="450" Width="800">
     <Grid>
         <TextBox x:Name="serverLogTextBox" HorizontalAlignment="Left" Height="336" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="761"/>
         <Button x:Name="serverStartButton" Content="Start server" HorizontalAlignment="Left" Margin="26,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="serverStartButton_click"/>

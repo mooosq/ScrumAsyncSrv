@@ -15,8 +15,8 @@ namespace ServAsync
         private static string Host = "localhost";
         private static string User = "postgres";
         private static string DBname = "IO_database";
-        private static string Password = "postgres";
-        private static string Port = "5432";
+        private static string Password = "admin";
+        private static string Port = "12345";
 
         string connString = String.Format("Server={0};Username={1};Database={2};Port={3};Password={4};SSLMode=Prefer", Host, User, DBname, Port, Password);
         TextBox txtBox;
@@ -28,17 +28,13 @@ namespace ServAsync
 
         public void setupDatabase()
         {
-            string text;
-
             using (var conn = new NpgsqlConnection(connString))
             {
-                Console.Out.WriteLine("Opening connection");
                 conn.Open();
 
                 using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS users(name VARCHAR(50) not null, password VARCHAR(50) not null, primary key (name))", conn))
                 {
                     command.ExecuteNonQuery();
-                    txtBox.Dispatcher.Invoke(delegate { txtBox.Text += "Created table\n"; });
                 }
 
 
@@ -46,11 +42,6 @@ namespace ServAsync
                 {
 
                     var reader = command.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        text = string.Format("Reading from table=({0}, {1})\n", reader.GetString(0), reader.GetString(1));
-                        txtBox.Dispatcher.Invoke(delegate { txtBox.Text += text; });
-                    }
                 }
 
             }
@@ -105,7 +96,7 @@ namespace ServAsync
                         }
                     }
                 }
-                txtBox.Dispatcher.Invoke(delegate { txtBox.Text += "Tried to log in to none existing user\n"; });
+                txtBox.Dispatcher.Invoke(delegate { txtBox.Text += $"[{DateTime.Now}] Tried to log in to none existing user\n"; });
                 return "";
             }
         }
@@ -131,7 +122,7 @@ namespace ServAsync
                 }
                 else
                 {
-                    txtBox.Dispatcher.Invoke(delegate { txtBox.Text += "Tried to add user that already exist\n"; });
+                    txtBox.Dispatcher.Invoke(delegate { txtBox.Text += $"[{DateTime.Now}] Tried to add user that already exist\n"; });
                     return false;
                 }
             }
