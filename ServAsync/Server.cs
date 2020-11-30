@@ -12,6 +12,7 @@ namespace ServAsync
     public class Server
     {
         TextBox log = null;
+        Database db;
         Dictionary<string, int> loggedIn = new Dictionary<string, int>();
         Dictionary<string, string> userData = new Dictionary<string, string>();
         private byte[] buffer = new byte[1024];
@@ -27,10 +28,14 @@ namespace ServAsync
         private byte[] logInfo = Encoding.ASCII.GetBytes("Logged succesfully!\r\nWant to play a game? Type 'yes' or 'no' to log out and exit: ");
         private byte[] logOutInfo = Encoding.ASCII.GetBytes("User with this login is still logged in! Logging out...");
         private byte[] backToMain = Encoding.ASCII.GetBytes("Exiting to main... Write 'login' or 'register' and retype credentials: ");
+        private byte[] userAlreadyExistMessage = Encoding.ASCII.GetBytes("User already exist.");
+
 
         public Server(ref TextBox txtBox)
         {
             this.log = txtBox;
+            db = new Database(log);
+            db.setupDatabase();
         }
 
         /// <summary>
@@ -151,24 +156,25 @@ namespace ServAsync
             try
             {
                 socket.BeginSend(enterPassword, 0, enterPassword.Length, SocketFlags.None, SendCallback, socket);
-                byte[] pass = Receive(socket);
-                string passOut;
-                if (userData.TryGetValue(Encoding.ASCII.GetString(login).Trim('\0'), out passOut) && passOut == Encoding.ASCII.GetString(pass).Trim('\0'))
+                String pass = Encoding.ASCII.GetString(Receive(socket)).Trim('\0');
+                String userLogin = Encoding.ASCII.GetString(login).Trim('\0');
+                
+                if (pass == db.userPassword(userLogin))
                 {
                     try
                     {
-                        loggedIn.Add(Encoding.ASCII.GetString(login).Trim('\0'), 1);
+                        loggedIn.Add(userLogin, 1);
                         socket.BeginSend(logInfo, 0, logInfo.Length, SocketFlags.None, SendCallback, socket);
                         log.Dispatcher.Invoke(delegate
                         {
-                            log.Text += $"[{DateTime.Now}] User '{Encoding.ASCII.GetString(login).Trim('\0')}' logged in\n";
+                            log.Text += $"[{DateTime.Now}] User '{userLogin}' logged in\n";
                         });
                     }
                     catch
                     {
                         log.Dispatcher.Invoke(delegate
                         {
-                            log.Text += $"[{DateTime.Now}] Client '{Encoding.ASCII.GetString(login).Trim('\0')}' is still logged in, dissconnecting the client...\n";
+                            log.Text += $"[{DateTime.Now}] Client '{userLogin}' is still logged in, dissconnecting the client...\n";
                         });
                         socket.Close();
                         clientSockets.Remove(socket);
@@ -294,15 +300,27 @@ namespace ServAsync
             try
             {
                 socket.BeginSend(enterLogin, 0, enterLogin.Length, SocketFlags.None, SendCallback, socket);
-                byte[] login = Receive(socket);
+                String login = Encoding.ASCII.GetString(Receive(socket)).Trim('\0');
                 socket.BeginSend(enterPassword, 0, enterPassword.Length, SocketFlags.None, SendCallback, socket);
-                byte[] pass = Receive(socket);
-                userData.Add(Encoding.ASCII.GetString(login).Trim('\0'), Encoding.ASCII.GetString(pass).Trim('\0'));
-                log.Dispatcher.Invoke(delegate
+                String pass = Encoding.ASCII.GetString(Receive(socket)).Trim('\0');
+                //userData.Add(Encoding.ASCII.GetString(login).Trim('\0'), Encoding.ASCII.GetString(pass).Trim('\0'));
+
+                if(db.addUser(login, pass))
                 {
-                    log.Text += $"[{DateTime.Now}] Client created account: {Encoding.ASCII.GetString(login).Trim('\0')}\n";
-                });
-                socket.BeginSend(createMessage, 0, createMessage.Length, SocketFlags.None, SendCallback, socket);
+                    log.Dispatcher.Invoke(delegate
+                    {
+                        log.Text += $"[{DateTime.Now}] Client created account: {login}\n";
+                    });
+                    socket.BeginSend(createMessage, 0, createMessage.Length, SocketFlags.None, SendCallback, socket);
+                }
+                else
+                {
+                    socket.BeginSend(userAlreadyExistMessage, 0, userAlreadyExistMessage.Length, SocketFlags.None, SendCallback, socket);
+                    socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
+                }
+
+                
+                
             }
             catch
             {
