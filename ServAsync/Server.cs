@@ -337,12 +337,9 @@ namespace ServAsync
                 }
                 else
                 {
-                    socket.BeginSend(userAlreadyExistMessage, 0, userAlreadyExistMessage.Length, SocketFlags.None, SendCallback, socket);
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
+                    socket.BeginSend(userAlreadyExistMessage, 0, userAlreadyExistMessage.Length, SocketFlags.None, SendCallback, socket);
                 }
-
-                
-                
             }
             catch
             {
