@@ -34,13 +34,24 @@ namespace GraphicServerConsole
         {
             if (srvState)
             {
-                srv = new Server(ref serverLogTextBox, ipTextBox.Text, portTextBox.Text);
-                srv.SetupServer();
+                if (ipTextBox.Text != "" && portTextBox.Text != "")
+                {
+                    try
+                    {
+                        srv = new Server(ref serverLogTextBox, ipTextBox.Text, portTextBox.Text);
+                        srv.SetupServer();
+                        srvState = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        serverLogTextBox.Text += $"[{DateTime.Now}] Something went wrong :( Details: {ex.Message}\n";
+                    }
+                }
+                else
+                    MessageBox.Show("IP address and port can not be empty!");
             }
             else
                 serverLogTextBox.Text += $"[{DateTime.Now}] Server already running!\n";
-
-            srvState = false;
         }
 
         private void stopServerButton_click(object sender, RoutedEventArgs e)

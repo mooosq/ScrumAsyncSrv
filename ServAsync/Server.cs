@@ -52,10 +52,10 @@ namespace ServAsync
         /// </summary>
         public void SetupServer()
         {
+            servSocekt.Bind(new IPEndPoint(IPAddress.Parse(ipAddr), port));
             log.Dispatcher.Invoke(delegate {
                 log.Text += $"Setting up the server...\nIP address: {ipAddr}\nPort: {port}\n";
             });
-            servSocekt.Bind(new IPEndPoint(IPAddress.Parse(ipAddr), port));
             servSocekt.Listen(10);
             servSocekt.BeginAccept(new AsyncCallback(AcceptCallback), null);
             log.Dispatcher.Invoke(delegate
