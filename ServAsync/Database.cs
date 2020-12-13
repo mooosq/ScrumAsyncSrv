@@ -15,8 +15,8 @@ namespace ServAsync
         private static string Host = "localhost";
         private static string User = "postgres";
         private static string DBname = "IO_database";
-        private static string Password = "admin";
-        private static string Port = "12345";
+        private static string Password = "postgres";
+        private static string Port = "5432";
 
         string connString = String.Format("Server={0};Username={1};Database={2};Port={3};Password={4};SSLMode=Prefer", Host, User, DBname, Port, Password);
         TextBox txtBox;
@@ -37,13 +37,15 @@ namespace ServAsync
                     command.ExecuteNonQuery();
                 }
 
-
-                using (var command = new NpgsqlCommand("SELECT * FROM users", conn))
+                using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS user_activity(name VARCHAR(50) not null, is_active BOOLEAN, foreign key (name) REFERENCES users(name))", conn))
                 {
-
-                    var reader = command.ExecuteReader();
+                    command.ExecuteNonQuery();
                 }
 
+                using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS high_scores(name VARCHAR(50) not null, best_score INTEGER, foreign key (name) REFERENCES users(name))", conn))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
         }
 
