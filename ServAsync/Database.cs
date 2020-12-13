@@ -15,8 +15,8 @@ namespace ServAsync
         private static string Host = "localhost";
         private static string User = "postgres";
         private static string DBname = "IO_database";
-        private static string Password = "postgres";
-        private static string Port = "5432";
+        private static string Password = "admin";
+        private static string Port = "12345";
 
         string connString = String.Format("Server={0};Username={1};Database={2};Port={3};Password={4};SSLMode=Prefer", Host, User, DBname, Port, Password);
         TextBox txtBox;

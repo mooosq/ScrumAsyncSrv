@@ -12,6 +12,8 @@ namespace ServAsync
 {
     public class Server : IDisposable
     {
+        string ipAddr;
+        int port;
         TextBox log = null;
         Database db;
         Dictionary<string, int> loggedIn = new Dictionary<string, int>();
@@ -36,8 +38,10 @@ namespace ServAsync
             servSocekt.Dispose();
         }
 
-        public Server(ref TextBox txtBox)
+        public Server(ref TextBox txtBox, string ipAddr, string port)
         {
+            this.ipAddr = ipAddr;
+            _ = int.TryParse(port, out this.port);
             log = txtBox;
             db = new Database(log);
             db.setupDatabase();
@@ -49,9 +53,9 @@ namespace ServAsync
         public void SetupServer()
         {
             log.Dispatcher.Invoke(delegate {
-                log.Text += "Setting up the server...\n";
+                log.Text += $"Setting up the server...\nIP address: {ipAddr}\nPort: {port}\n";
             });
-            servSocekt.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 22111));
+            servSocekt.Bind(new IPEndPoint(IPAddress.Parse(ipAddr), port));
             servSocekt.Listen(10);
             servSocekt.BeginAccept(new AsyncCallback(AcceptCallback), null);
             log.Dispatcher.Invoke(delegate
@@ -240,7 +244,7 @@ namespace ServAsync
                     string userKey = FindUser(clientSockets.IndexOf(socket));
                     log.Dispatcher.Invoke(delegate
                     {
-                        log.Text += $"[{DateTime.Now}] User {userKey} logged out\n";
+                        log.Text += $"[{DateTime.Now}] User '{userKey}' logged out\n";
                     });
                 }
                 else

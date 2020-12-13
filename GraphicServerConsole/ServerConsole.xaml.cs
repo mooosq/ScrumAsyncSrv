@@ -34,7 +34,7 @@ namespace GraphicServerConsole
         {
             if (srvState)
             {
-                srv = new Server(ref serverLogTextBox);
+                srv = new Server(ref serverLogTextBox, ipTextBox.Text, portTextBox.Text);
                 srv.SetupServer();
             }
             else

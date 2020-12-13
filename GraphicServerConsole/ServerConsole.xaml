@@ -7,10 +7,14 @@
         mc:Ignorable="d"
         Title="Server Console" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="serverLogTextBox" HorizontalAlignment="Left" Height="336" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="761"/>
+        <TextBox x:Name="serverLogTextBox" HorizontalAlignment="Left" Height="288" Margin="10,58,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="761"/>
         <Button x:Name="serverStartButton" Content="Start server" HorizontalAlignment="Left" Margin="26,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="serverStartButton_click"/>
         <Button x:Name="stopServerButton" Content="Stop server" HorizontalAlignment="Left" Margin="649,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="stopServerButton_click"/>
         <Button x:Name="exitButton" Content="Exit" HorizontalAlignment="Left" Margin="347,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="exitButton_click"/>
+        <Label x:Name="ipLabel" Content="Server IP address:" HorizontalAlignment="Left" Margin="20,18,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.103,0.583"/>
+        <TextBox x:Name="ipTextBox" HorizontalAlignment="Left" Height="23" Margin="129,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.493,0.121" FontSize="14"/>
+        <Label x:Name="portLabel" Content="Server port:" HorizontalAlignment="Left" Margin="303,18,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.305,0.282"/>
+        <TextBox x:Name="portTextBox" HorizontalAlignment="Left" Height="23" Margin="380,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="14"/>
 
     </Grid>
 </Window>
