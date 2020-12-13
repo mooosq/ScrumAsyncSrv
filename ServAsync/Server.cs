@@ -41,7 +41,7 @@ namespace ServAsync
             log = txtBox;
             db = new Database(log);
             db.setupDatabase();
-        }
+        } 
 
         /// <summary>
         /// Glowna funkcja uruchamiajaca serwer

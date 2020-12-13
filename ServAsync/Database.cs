@@ -37,7 +37,7 @@ namespace ServAsync
                     command.ExecuteNonQuery();
                 }
 
-                using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS user_activity(name VARCHAR(50) not null, is_active BOOLEAN, foreign key (name) REFERENCES users(name))", conn))
+                using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS active_users(name VARCHAR(50) not null unique)", conn))
                 {
                     command.ExecuteNonQuery();
                 }
@@ -130,6 +130,70 @@ namespace ServAsync
             }
         }
 
+        public bool isLoggedIn(String name)
+        {
+            String commandText;
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+                commandText = string.Format("SELECT name FROM active_users WHERE name=\'{0}\'", name);
+
+                using (var command = new NpgsqlCommand(commandText, conn))
+                {
+                    var reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        public void logUserIn(String name)
+        {
+            String commandText;
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+
+                commandText = string.Format("insert into active_users(name) values (\'{0}\')", name);
+
+                using (var command = new NpgsqlCommand(commandText, conn))
+                {
+                    try
+                    {
+                        var reader = command.ExecuteReader();
+                    }
+                    catch
+                    {
+                        txtBox.Dispatcher.Invoke(delegate { txtBox.Text += "User already logged in\n"; });
+                    }
+                }
+            }
+        }
+
+        public void logUserOut(String name)
+        {
+            String commandText;
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+
+                commandText = string.Format("delete from active_users where name=\'{0}\'", name);
+
+                using (var command = new NpgsqlCommand(commandText, conn))
+                {
+                    var reader = command.ExecuteReader();
+                }
+            }
+        }
     }
 
 }
