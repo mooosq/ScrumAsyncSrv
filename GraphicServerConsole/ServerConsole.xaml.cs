@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -48,7 +49,7 @@ namespace GraphicServerConsole
                     }
                 }
                 else
-                    MessageBox.Show("IP address and port can not be empty!");
+                    MessageBox.Show("IP address and port can not be empty!", "Error");
             }
             else
                 serverLogTextBox.Text += $"[{DateTime.Now}] Server already running!\n";
@@ -70,6 +71,27 @@ namespace GraphicServerConsole
         private void exitButton_click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void listClientsButton_click(object sender, RoutedEventArgs e)
+        {
+            if(!srvState)
+            {
+                List<Socket> clientsSockets = srv.getClients();
+                if (clientsSockets.Count != 0)
+                {
+                    var message = "";
+                    foreach (Socket client in clientsSockets)
+                        message += "Client IP: " + client.RemoteEndPoint + "\n";
+                    MessageBox.Show(message, "Clients");
+                }
+                else
+                    MessageBox.Show("No clients connected", "Clients");
+            }
+            else
+            {
+                MessageBox.Show("Run server first!", "Error");
+            }
         }
     }
 }

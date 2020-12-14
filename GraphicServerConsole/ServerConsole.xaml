@@ -13,8 +13,9 @@
         <Button x:Name="exitButton" Content="Exit" HorizontalAlignment="Left" Margin="347,356,0,0" VerticalAlignment="Top" Width="109" Height="42" Click="exitButton_click"/>
         <Label x:Name="ipLabel" Content="Server IP address:" HorizontalAlignment="Left" Margin="20,18,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.103,0.583"/>
         <TextBox x:Name="ipTextBox" HorizontalAlignment="Left" Height="23" Margin="129,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.493,0.121" FontSize="14"/>
-        <Label x:Name="portLabel" Content="Server port:" HorizontalAlignment="Left" Margin="303,18,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.305,0.282"/>
-        <TextBox x:Name="portTextBox" HorizontalAlignment="Left" Height="23" Margin="380,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="14"/>
+        <Label x:Name="portLabel" Content="Server port:" HorizontalAlignment="Left" Margin="325,18,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.305,0.282"/>
+        <TextBox x:Name="portTextBox" HorizontalAlignment="Left" Height="23" Margin="403,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="14"/>
+        <Button x:Name="listClientsButton" Content="List clients" HorizontalAlignment="Left" Margin="620,21,0,0" VerticalAlignment="Top" Width="138" Height="23" RenderTransformOrigin="0.81,0.693" Click="listClientsButton_click"/>
 
     </Grid>
 </Window>

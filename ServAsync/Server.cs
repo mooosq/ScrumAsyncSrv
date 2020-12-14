@@ -28,9 +28,9 @@ namespace ServAsync
         private byte[] wrongCredentials = Encoding.ASCII.GetBytes("Wrong credentials!\r\nType your choice again: ");
         private byte[] again = Encoding.ASCII.GetBytes("\r\nType 'login' or 'register': ");
         private byte[] logInfo = Encoding.ASCII.GetBytes("Logged succesfully!\r\nWant to play a game? Type 'yes' or 'no' to log out and exit: ");
-        private byte[] logOutInfo = Encoding.ASCII.GetBytes("User with this login is still logged in! Logging out...");
+        private byte[] logOutInfo = Encoding.ASCII.GetBytes("User with this login is still logged in! Returning to the main...\n");
         private byte[] backToMain = Encoding.ASCII.GetBytes("Exiting to main... Write 'login' or 'register' and retype credentials: ");
-        private byte[] userAlreadyExistMessage = Encoding.ASCII.GetBytes("User already exist.");
+        private byte[] userAlreadyExistMessage = Encoding.ASCII.GetBytes("User already exist. Type 'login' or 'register': ");
 
 
         public void Dispose()
@@ -62,6 +62,11 @@ namespace ServAsync
             {
                 log.Text += "Configuration complete!\n";
             });
+        }
+
+        public List<Socket> getClients()
+        {
+            return clientSockets;
         }
 
         /// <summary>
@@ -256,7 +261,7 @@ namespace ServAsync
                     RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
                     rng.GetBytes(randomBytes);
 
-                    int userInput, randomInteger = BitConverter.ToInt32(randomBytes, 0) % 101;
+                    int userInput, randomInteger = (int)(BitConverter.ToUInt32(randomBytes, 0) % 101);
 
                     byte[] randomInfo = Encoding.ASCII.GetBytes("Just get randomly selected number for you, try guess it!\r\nYour type: ");
                     byte[] tooBig = Encoding.ASCII.GetBytes("Too big number! Enter your type again: ");
@@ -284,7 +289,7 @@ namespace ServAsync
                                 string userKey = FindUser(clientSockets.IndexOf(socket));
                                 log.Dispatcher.Invoke(delegate
                                 {
-                                    log.Text += $"[{DateTime.Now}] User {userKey} guessed the number. Logging out {userKey}...\n";
+                                    log.Text += $"[{DateTime.Now}] User '{userKey}' guessed the number. Logging out '{userKey}'...\n";
                                 });
                                 socket.BeginSend(again, 0, again.Length, SocketFlags.None, SendCallback, socket);
                             }
@@ -341,7 +346,7 @@ namespace ServAsync
                 }
                 else
                 {
-                    socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
+                    //socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
                     socket.BeginSend(userAlreadyExistMessage, 0, userAlreadyExistMessage.Length, SocketFlags.None, SendCallback, socket);
                 }
             }
