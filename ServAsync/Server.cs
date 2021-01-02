@@ -16,7 +16,6 @@ namespace ServAsync
         int port;
         TextBox log = null;
         Database db;
-        Dictionary<string, int> loggedIn = new Dictionary<string, int>();
         private byte[] buffer = new byte[1024];
         private List<Socket> clientSockets = new List<Socket>();
         private Socket servSocekt = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -158,14 +157,14 @@ namespace ServAsync
                         socket.BeginSend(invalidRequest, 0, invalidRequest.Length, SocketFlags.None, SendCallback, socket);
                 }
 
-                if (request == "login" || request == "gin" && loggedIn.ContainsKey(Encoding.ASCII.GetString(login).Trim('\0')))
+                if (request == "login" || request == "gin" && db.isLoggedIn(Encoding.ASCII.GetString(login).Trim('\0')))
                 {
-                    if (loggedIn.TryGetValue(Encoding.ASCII.GetString(login).Trim('\0'), out isLogged) && isLogged == 1)
-                        socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, GameCallback, socket);
+                    socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, GameCallback, socket);
                 }
                 else
+                {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
-
+                }
             }
             catch
             {
@@ -195,7 +194,7 @@ namespace ServAsync
                 {
                     try
                     {
-                        loggedIn.Add(userLogin, 1);
+                        db.logUserIn(userLogin, clientSockets.IndexOf(socket));
                         socket.BeginSend(logInfo, 0, logInfo.Length, SocketFlags.None, SendCallback, socket);
                         log.Dispatcher.Invoke(delegate
                         {
@@ -246,7 +245,7 @@ namespace ServAsync
                 if (answerOut != "\r\ns")
                 {
                     socket.BeginSend(backToMain, 0, backToMain.Length, SocketFlags.None, SendCallback, socket);
-                    string userKey = FindUser(clientSockets.IndexOf(socket));
+                    string userKey = db.GetNameBySocketId(clientSockets.IndexOf(socket));
                     log.Dispatcher.Invoke(delegate
                     {
                         log.Text += $"[{DateTime.Now}] User '{userKey}' logged out\n";
@@ -286,7 +285,7 @@ namespace ServAsync
                                 byte[] success = Encoding.ASCII.GetBytes($"You got it! The number is {randomInteger}. Thanks for playing!");
                                 socket.BeginSend(success, 0, success.Length, SocketFlags.None, SendCallback, socket);
                                 guess = true;
-                                string userKey = FindUser(clientSockets.IndexOf(socket));
+                                string userKey = db.GetNameBySocketId(clientSockets.IndexOf(socket));
                                 log.Dispatcher.Invoke(delegate
                                 {
                                     log.Text += $"[{DateTime.Now}] User '{userKey}' guessed the number. Logging out '{userKey}'...\n";
@@ -297,17 +296,8 @@ namespace ServAsync
                     }
                 }
 
-                counter = 0;
-                index = clientSockets.IndexOf(socket);
-                foreach (KeyValuePair<string, int> user in loggedIn)
-                {
-                    if (counter == index)
-                    {
-                        loggedIn.Remove(user.Key);
-                        break;
-                    }
-                    counter++;
-                }
+
+                db.logUserOut(clientSockets.IndexOf(socket));
 
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ChoiceCallback, socket);
             }
@@ -396,27 +386,6 @@ namespace ServAsync
             }
 
             return bytes;
-        }
-
-        /// <summary>
-        /// Funkcja zwracajaca nazwe uzytkownika po numerze gniazda do ktorego podlaczyl sie dany uzytkownik
-        /// </summary>
-        /// <param name="clientSocketIndex">Klucz danego uzytkownika w slowniku</param>
-        /// <returns></returns>
-        private string FindUser(int clientSocketIndex)
-        {
-            string userKey = null;
-            int counter = 0;
-            foreach (KeyValuePair<string, int> user in loggedIn)
-            {
-                if (counter == clientSocketIndex)
-                {
-                    userKey = user.Key;
-                    break;
-                }
-                counter++;
-            }
-            return userKey;
         }
 
         /// <summary>

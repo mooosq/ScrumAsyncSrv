@@ -15,8 +15,8 @@ namespace ServAsync
         private static string Host = "localhost";
         private static string User = "postgres";
         private static string DBname = "IO_database";
-        private static string Password = "admin";
-        private static string Port = "12345";
+        private static string Password = "postgres";
+        private static string Port = "5432";
 
         string connString = String.Format("Server={0};Username={1};Database={2};Port={3};Password={4};SSLMode=Prefer", Host, User, DBname, Port, Password);
         TextBox txtBox;
@@ -37,7 +37,7 @@ namespace ServAsync
                     command.ExecuteNonQuery();
                 }
 
-                using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS active_users(name VARCHAR(50) not null unique)", conn))
+                using (var command = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS active_users(name VARCHAR(50) not null unique, socketId int)", conn))
                 {
                     command.ExecuteNonQuery();
                 }
@@ -130,6 +130,30 @@ namespace ServAsync
             }
         }
 
+        public String GetNameBySocketId(int socketId)
+        {
+            String commandText;
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+                commandText = string.Format("SELECT name FROM active_users WHERE socketId={0}", socketId);
+
+                using (var command = new NpgsqlCommand(commandText, conn))
+                {
+                    var reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        return reader.GetString(0);
+                    }
+                    else
+                    {
+                        return "ERROR occured when getting userName by socketId";
+                    }
+                }
+            }
+        }
+
         public bool isLoggedIn(String name)
         {
             String commandText;
@@ -154,7 +178,7 @@ namespace ServAsync
             }
         }
 
-        public void logUserIn(String name)
+        public void logUserIn(String name, int socketId)
         {
             String commandText;
 
@@ -162,7 +186,7 @@ namespace ServAsync
             {
                 conn.Open();
 
-                commandText = string.Format("insert into active_users(name) values (\'{0}\')", name);
+                commandText = string.Format("insert into active_users(name, socketId) values (\'{0}\', \'{1}\')", name, socketId);
 
                 using (var command = new NpgsqlCommand(commandText, conn))
                 {
@@ -178,7 +202,7 @@ namespace ServAsync
             }
         }
 
-        public void logUserOut(String name)
+        public void logUserOut(int socketId)
         {
             String commandText;
 
@@ -186,7 +210,7 @@ namespace ServAsync
             {
                 conn.Open();
 
-                commandText = string.Format("delete from active_users where name=\'{0}\'", name);
+                commandText = string.Format("delete from active_users where socketId={0}", socketId);
 
                 using (var command = new NpgsqlCommand(commandText, conn))
                 {
