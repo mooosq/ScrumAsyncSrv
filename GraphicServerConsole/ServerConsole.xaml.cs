@@ -93,5 +93,10 @@ namespace GraphicServerConsole
                 MessageBox.Show("Run server first!", "Error");
             }
         }
+
+        private void clearServerLogTextBox_click(object sender, RoutedEventArgs e)
+        {
+            serverLogTextBox.Text = "";
+        }
     }
 }
