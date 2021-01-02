@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicServerConsole", "Gra
 		{63ECBFB1-1B0A-45B6-B99E-4D2F57D472DE} = {63ECBFB1-1B0A-45B6-B99E-4D2F57D472DE}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicClient", "GraphicClient\GraphicClient.csproj", "{B1B04B80-D827-4305-BD73-EB9D9E3AD8DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{2B968194-8356-4F96-9414-B8778C50843E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B968194-8356-4F96-9414-B8778C50843E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B968194-8356-4F96-9414-B8778C50843E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1B04B80-D827-4305-BD73-EB9D9E3AD8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1B04B80-D827-4305-BD73-EB9D9E3AD8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1B04B80-D827-4305-BD73-EB9D9E3AD8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1B04B80-D827-4305-BD73-EB9D9E3AD8DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
